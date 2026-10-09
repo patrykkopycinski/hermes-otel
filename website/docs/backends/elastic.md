@@ -50,7 +50,7 @@ uv run --extra dev python scripts/verify_elastic.py   # end-to-end smoke: export
 ./scripts/import_elastic_dashboard.sh                 # optional: hermes-otel dashboard in Kibana
 ```
 
-The bundled dashboard (`docker-compose/elastic/dashboards.ndjson`) ships five panels — top span names, spans by operation, token usage by token type (sum of `hermes.token.usage`), tool-call duration by tool, and messages per model (sum of `hermes.model.usage`) — rendered with real session data in [`dashboard.png`](https://github.com/briancaffey/hermes-otel/blob/main/docker-compose/elastic/dashboard.png). Kibana listens on `http://127.0.0.1:15602` (security disabled).
+The bundled dashboard (`docker-compose/elastic/dashboards.ndjson`) ships five panels — top span names, spans by operation, token usage by token type (sum of `hermes.token.usage`), tool-call duration by tool (median, as a bar chart), and messages per model (sum of `hermes.model.usage`) — rendered with real session data in [`dashboard.png`](https://github.com/briancaffey/hermes-otel/blob/main/docker-compose/elastic/dashboard.png). Kibana listens on `http://127.0.0.1:15602` (security disabled).
 
 ### Importing into a security-enabled Kibana
 
@@ -68,6 +68,8 @@ export KIBANA_USERNAME=elastic KIBANA_PASSWORD="<password>"
 ```
 
 `KIBANA_API_KEY` takes precedence when both are set; with neither set the request is sent unauthenticated, which keeps the no-login compose path working.
+
+The credentials are passed to `curl` on stdin rather than on its command line, so they do not show up in `ps` output. The script exits non-zero if Kibana is unreachable, answers with a non-200 status, or answers 200 with `"success": false` (it then lists the object ids that failed to import); on success it prints the `successCount`.
 
 ## Why a dedicated `type: elastic`
 
